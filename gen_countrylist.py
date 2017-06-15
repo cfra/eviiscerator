@@ -3,8 +3,11 @@
 import csv
 import sys
 import os
+import datetime
 
-os.chdir(os.path.dirname(__file__))
+basedir = os.path.dirname(__file__)
+if basedir:
+    os.chdir(basedir)
 
 filename = 'bookings.csv'
 guest_filename = 'guests.csv'
@@ -50,7 +53,10 @@ for addition in list(csv.reader(open('additions.csv', 'r')))[1:]:
         name_to_country[name] = country
 
 bookings = list(csv.reader(open(filename,'r',encoding='utf16')))
-if (bookings[1][8] != 'Nächte'
+if (bookings[1][4] != 'Vorname'
+    or bookings[1][5] != 'Nachname'
+    or bookings[1][6] != 'Einchecken'
+    or bookings[1][8] != 'Nächte'
     or bookings[1][13] != 'Erwachsene'
     or bookings[1][14] != 'Kinder'
     or bookings[1][23] != 'Buchungsstatus'
@@ -61,6 +67,8 @@ if (bookings[1][8] != 'Nächte'
 country_people = {}
 country_stays = {}
 
+first_checkin = None
+last_checkin = None
 unknown = []
 for booking in bookings[2:]:
     if booking[23] != 'Bestätigt':
@@ -69,6 +77,11 @@ for booking in bookings[2:]:
     people = int(booking[13]) + int(booking[14])
     mail = booking[25]
     phone = booking[26]
+    checkin = datetime.datetime.strptime(booking[6], '%d-%b-%y')
+    if first_checkin is None or checkin < first_checkin:
+        first_checkin = checkin
+    if last_checkin is None or checkin > last_checkin:
+        last_checkin = checkin
 
     name = '%s %s' % (booking[4],booking[5])
     if mail in mail_to_country:
@@ -79,9 +92,9 @@ for booking in bookings[2:]:
         name = name_to_country[name]
     else:
         #print("Could not lookup country for booking %r" % (booking))
-        unknown_str = '%s %s Mail: %s Phone: %s' % (booking[4],booking[5],mail,phone)
-        if unknown_str not in unknown:
-            unknown.append(unknown_str)
+        unknown_info = (mail,phone,name)
+        if unknown_info not in unknown:
+            unknown.append(unknown_info)
 
     if country not in country_people:
         country_people[country] = 0
@@ -92,11 +105,21 @@ for booking in bookings[2:]:
 
 
 if len(unknown):
-    print("Could not determine country for the following people:")
+    print("Could not determine country for the following people, please enter:")
     for person in unknown:
-        print(person)
-    print("Please add a mapping to additions.csv")
-    raise Exception("Need additions")
+        mail = person[0] if not 'Bitte die Buchung entsperren' in person[0] else ''
+        phone = person[1] if not 'Bitte die Buchung entsperren' in person[1] else ''
+        name = person[2]
+        country = input('Whats the country for %s (Mail: %r, Phone: %r)?' % (name, mail, phone))
+        with open('additions.csv','a') as f:
+            line = '%s,%s,%s,%s\n' % (mail,phone,country,name)
+            f.write(line)
+    print("All done. Please restart.")
+    sys.exit(1)
+
+print("Information for %s to %s:\n\n" % (
+      first_checkin.strftime('%d. %B %Y'),
+      last_checkin.strftime('%d. %B %Y')))
 
 print("Persons by Country")
 for country,people in sorted(country_people.items(), key=lambda x:-x[1]):
