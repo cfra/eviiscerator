@@ -23,7 +23,12 @@ for invoice in invoices[1:]:
     if not len(invoice):
         continue
     if invoice[3].strip().lower() in booking_to_invoice:
-        raise Exception("Multiple invoices for one booking")
+        print("!!!! Booking %r has multiple invoices, at least %r and %r" % (
+            invoice[3].strip().lower(),
+            booking_to_invoice[invoice[3].strip().lower()],
+            invoice[4]))
+        #raise Exception("Multiple invoices for one booking")
+        # Assume last invoice is the correct one for now :/
     booking_to_invoice[invoice[3].strip().lower()] = invoice[4]
 
 cash_payments = []
