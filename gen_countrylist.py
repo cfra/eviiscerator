@@ -13,10 +13,9 @@ filename = 'bookings.csv'
 guest_filename = 'guests.csv'
 
 guests = list(csv.reader(open(guest_filename, 'r')))
-if (guests[0][7] != 'Email'
-        or guests[0][8] != 'Telephone'
-        or guests[0][12] != 'Country'):
-    raise Exception("Guest report changed format!")
+assert guests[0][7] == 'Email'
+assert guests[0][8] == 'Telephone'
+assert guests[0][12] == 'Country'
 
 mail_to_country = {}
 phone_to_country = {}
@@ -34,11 +33,14 @@ for guest in guests[1:]:
         print("Could not read guest %r" % (guest))
         raise
 
+if not os.path.exists('additions.csv'):
+    with open('additions.csv','w') as f:
+        f.write('Mail,Phone,Country,Name\n')
 for addition in list(csv.reader(open('additions.csv', 'r')))[1:]:
     if not len(addition):
         continue
     mail = addition[0]
-    phone = addition[1]
+    phone = addition[1] if len(addition) >= 2 else ''
     country = addition[2] if len(addition) >= 3 else ''
     if not country:
         country = "Germany"
@@ -53,16 +55,15 @@ for addition in list(csv.reader(open('additions.csv', 'r')))[1:]:
         name_to_country[name] = country
 
 bookings = list(csv.reader(open(filename,'r',encoding='utf16')))
-if (bookings[1][4] != 'Vorname'
-    or bookings[1][5] != 'Nachname'
-    or bookings[1][6] != 'Einchecken'
-    or bookings[1][8] != 'Nächte'
-    or bookings[1][13] != 'Erwachsene'
-    or bookings[1][14] != 'Kinder'
-    or bookings[1][23] != 'Buchungsstatus'
-    or bookings[1][25] != 'Gast Email'
-    or bookings[1][26] != 'Telefon 1'):
-    raise Exception("Booking report changed format!")
+assert bookings[1][4]  == 'Vorname'
+assert bookings[1][5]  == 'Nachname'
+assert bookings[1][6]  == 'Einchecken'
+assert bookings[1][8]  == 'Nächte'
+assert bookings[1][13] == 'Erwachsene'
+assert bookings[1][14] == 'Kinder'
+assert bookings[1][23] == 'Buchungsstatus'
+assert bookings[1][25] == 'Gast Email'
+assert bookings[1][26] == 'Telefon 1'
 
 country_people = {}
 country_stays = {}
@@ -110,7 +111,7 @@ if len(unknown):
         mail = person[0] if not 'Bitte die Buchung entsperren' in person[0] else ''
         phone = person[1] if not 'Bitte die Buchung entsperren' in person[1] else ''
         name = person[2]
-        country = input('Whats the country for %s (Mail: %r, Phone: %r)?' % (name, mail, phone))
+        country = input('Whats the country for %s (Mail: %r, Phone: %r)? ' % (name, mail, phone))
         with open('additions.csv','a') as f:
             line = '%s,%s,%s,%s\n' % (mail,phone,country,name)
             f.write(line)
