@@ -1,4 +1,2 @@
-/additions.csv
-/guests.csv
-/bookings.csv
+*.csv
 __pycache__
