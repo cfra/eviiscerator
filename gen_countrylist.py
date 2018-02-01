@@ -13,9 +13,14 @@ filename = 'bookings.csv'
 guest_filename = 'guests.csv'
 
 guests = list(csv.reader(open(guest_filename, 'r')))
-if (guests[0][7] != 'Email'
-        or guests[0][8] != 'Telephone'
-        or guests[0][12] != 'Country'):
+
+EMAIL_COLUMN = 3
+PHONE_COLUMN = 4
+COUNTRY_COLUMN = 8
+
+if (guests[0][EMAIL_COLUMN] != 'Email'
+        or guests[0][PHONE_COLUMN] != 'Telephone'
+        or guests[0][COUNTRY_COLUMN] != 'Country'):
     raise Exception("Guest report changed format!")
 
 mail_to_country = {}
@@ -25,11 +30,11 @@ for guest in guests[1:]:
     if not len(guest):
         continue
     try:
-        country = guest[12]
+        country = guest[COUNTRY_COLUMN]
         if not country:
             country = 'Germany'
-        mail_to_country[guest[7].lower()] = country
-        phone_to_country[guest[8].lower()] = country
+        mail_to_country[guest[EMAIL_COLUMN].lower()] = country
+        phone_to_country[guest[PHONE_COLUMN].lower()] = country
     except Exception:
         print("Could not read guest %r" % (guest))
         raise
