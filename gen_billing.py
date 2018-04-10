@@ -16,8 +16,8 @@ invoices_filename = 'invoices.csv'
 
 invoices = list(csv.reader(open(invoices_filename,'r')))
 
-BOOKING_REFERENCE_COLUMN = 3
-REFERENCE_COLUMN = 4
+BOOKING_REFERENCE_COLUMN = 5
+REFERENCE_COLUMN = 6
 if (invoices[0][BOOKING_REFERENCE_COLUMN] != 'BookingReference'
         or invoices[0][REFERENCE_COLUMN] != 'Reference'):
     raise Exception("Invoice report changed format!")
@@ -38,12 +38,12 @@ for invoice in invoices[1:]:
 cash_payments = []
 wire_transfers = []
 
-payments = [payment[16:] for payment in csv.reader(open(payments_filename,'r'))]
+payments = [payment[17:] for payment in csv.reader(open(payments_filename,'r'))]
 RECEIVED_DATE_COLUMN = 0
 FORENAME_COLUMN = 1
-BOOKING_REFERENCE_COLUMN = 5
-PAYMENT_METHOD_COLUMN = 9
-DIRECT1_COLUMN = 15
+BOOKING_REFERENCE_COLUMN = 6
+PAYMENT_METHOD_COLUMN = 10
+DIRECT1_COLUMN = 16
 
 if (payments[0][RECEIVED_DATE_COLUMN] != 'ReceivedDate'
         or payments[0][FORENAME_COLUMN] != 'Forename'
