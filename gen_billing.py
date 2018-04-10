@@ -15,49 +15,60 @@ payments_filename = 'payments.csv'
 invoices_filename = 'invoices.csv'
 
 invoices = list(csv.reader(open(invoices_filename,'r')))
-assert invoices[0][3] == 'BookingReference'
-assert invoices[0][4] == 'Reference'
+
+BOOKING_REFERENCE_COLUMN = 3
+REFERENCE_COLUMN = 4
+if (invoices[0][BOOKING_REFERENCE_COLUMN] != 'BookingReference'
+        or invoices[0][REFERENCE_COLUMN] != 'Reference'):
+    raise Exception("Invoice report changed format!")
 
 booking_to_invoice = {}
 for invoice in invoices[1:]:
     if not len(invoice):
         continue
-    if invoice[3].strip().lower() in booking_to_invoice:
+    if invoice[BOOKING_REFERENCE_COLUMN].strip().lower() in booking_to_invoice:
         print("!!!! Booking %r has multiple invoices, at least %r and %r" % (
-            invoice[3].strip().lower(),
-            booking_to_invoice[invoice[3].strip().lower()],
-            invoice[4]))
+            invoice[BOOKING_REFERENCE_COLUMN].strip().lower(),
+            booking_to_invoice[invoice[BOOKING_REFERENCE_COLUMN].strip().lower()],
+            invoice[REFERENCE_COLUMN]))
         #raise Exception("Multiple invoices for one booking")
         # Assume last invoice is the correct one for now :/
-    booking_to_invoice[invoice[3].strip().lower()] = invoice[4]
+    booking_to_invoice[invoice[BOOKING_REFERENCE_COLUMN].strip().lower()] = invoice[REFERENCE_COLUMN]
 
 cash_payments = []
 wire_transfers = []
 
 payments = [payment[16:] for payment in csv.reader(open(payments_filename,'r'))]
-assert payments[0][0] == 'ReceivedDate'
-assert payments[0][1] == 'Forename'
-assert payments[0][5] == 'BookingReference'
-assert payments[0][9] == 'PaymentMethod'
-assert payments[0][15] == 'Direct1'
+RECEIVED_DATE_COLUMN = 0
+FORENAME_COLUMN = 1
+BOOKING_REFERENCE_COLUMN = 5
+PAYMENT_METHOD_COLUMN = 9
+DIRECT1_COLUMN = 15
+
+if (payments[0][RECEIVED_DATE_COLUMN] != 'ReceivedDate'
+        or payments[0][FORENAME_COLUMN] != 'Forename'
+        or payments[0][BOOKING_REFERENCE_COLUMN] != 'BookingReference'
+        or payments[0][PAYMENT_METHOD_COLUMN] != 'PaymentMethod'
+        or payments[0][DIRECT1_COLUMN] != 'Direct1'):
+    raise Exception("Payment report changed format!")
 
 for idx,payment in enumerate(payments[1:]):
     if not len(payment):
         continue
 
-    if payment[0] != '(see above)':
-        date = datetime.datetime.strptime(payment[0].split(' ')[0], '%d/%m/%Y')
+    if payment[RECEIVED_DATE_COLUMN] != '(see above)':
+        date = datetime.datetime.strptime(payment[RECEIVED_DATE_COLUMN].split(' ')[0], '%d/%m/%Y')
 
-    name = payment[1].strip()
-    reservation = payment[5]
+    name = payment[FORENAME_COLUMN].strip()
+    reservation = payment[BOOKING_REFERENCE_COLUMN]
     if reservation.strip().lower() in booking_to_invoice:
         reference = booking_to_invoice[reservation.strip().lower()]
     else:
         reference = reservation
 
-    payment_method = payment[9]
+    payment_method = payment[PAYMENT_METHOD_COLUMN]
 
-    payment_value_raw = payment[15]
+    payment_value_raw = payment[DIRECT1_COLUMN]
     if not payment_value_raw:
         continue
 
@@ -127,4 +138,3 @@ if __name__ == '__main__':
             ws.write(idx,dest_col,amount, style=cur_style)
 
     wb.save(time.strftime('billing-%Y-%m-%d-%H-%M.xls'))
-
