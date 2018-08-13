@@ -60,16 +60,26 @@ for addition in list(csv.reader(open('additions.csv', 'r')))[1:]:
     if name:
         name_to_country[name] = country
 
+BOOKING_GIVEN_NAME_COLUMN = 4
+BOOKING_SURNAME_COLUMN = 5
+BOOKING_CHECKIN_COLUMN = 6
+BOOKING_NIGHTS_COLUMN = 8
+BOOKING_ADULTS_COLUMN = 13
+BOOKING_CHILDREN_COLUMN = 14
+BOOKING_STATUS_COLUMN = 24
+BOOKING_EMAIL_COLUMN = 26
+BOOKING_TELEPHONE_COLUMN = 27
+
 bookings = list(csv.reader(open(filename,'r',encoding='utf16')))
-if (bookings[1][4] != 'Vorname'
-    or bookings[1][5] != 'Nachname'
-    or bookings[1][6] != 'Einchecken'
-    or bookings[1][8] != 'Nächte'
-    or bookings[1][13] != 'Erwachsene'
-    or bookings[1][14] != 'Kinder'
-    or bookings[1][23] != 'Buchungsstatus'
-    or bookings[1][25] != 'Gast Email'
-    or bookings[1][26] != 'Telefon 1'):
+if (bookings[1][BOOKING_GIVEN_NAME_COLUMN] != 'Vorname'
+    or bookings[1][BOOKING_SURNAME_COLUMN] != 'Nachname'
+    or bookings[1][BOOKING_CHECKIN_COLUMN] != 'Einchecken'
+    or bookings[1][BOOKING_NIGHTS_COLUMN] != 'Nächte'
+    or bookings[1][BOOKING_ADULTS_COLUMN] != 'Erwachsene'
+    or bookings[1][BOOKING_CHILDREN_COLUMN] != 'Kinder'
+    or bookings[1][BOOKING_STATUS_COLUMN] != 'Buchungsstatus'
+    or bookings[1][BOOKING_EMAIL_COLUMN] != 'Gast Email'
+    or bookings[1][BOOKING_TELEPHONE_COLUMN] != 'Telefon 1'):
     raise Exception("Booking report changed format!")
 
 country_people = {}
@@ -79,19 +89,19 @@ first_checkin = None
 last_checkin = None
 unknown = []
 for booking in bookings[2:]:
-    if booking[23] != 'Bestätigt':
+    if booking[BOOKING_STATUS_COLUMN] != 'Bestätigt':
         continue
-    nights = int(booking[8])
-    people = int(booking[13]) + int(booking[14])
-    mail = booking[25]
-    phone = booking[26]
-    checkin = datetime.datetime.strptime(booking[6], '%d-%b-%y')
+    nights = int(booking[BOOKING_NIGHTS_COLUMN])
+    people = int(booking[BOOKING_ADULTS_COLUMN]) + int(booking[BOOKING_CHILDREN_COLUMN])
+    mail = booking[BOOKING_EMAIL_COLUMN]
+    phone = booking[BOOKING_TELEPHONE_COLUMN]
+    checkin = datetime.datetime.strptime(booking[BOOKING_CHECKIN_COLUMN], '%d-%b-%y')
     if first_checkin is None or checkin < first_checkin:
         first_checkin = checkin
     if last_checkin is None or checkin > last_checkin:
         last_checkin = checkin
 
-    name = '%s %s' % (booking[4],booking[5])
+    name = '%s %s' % (booking[BOOKING_GIVEN_NAME_COLUMN],booking[BOOKING_SURNAME_COLUMN])
     if mail in mail_to_country:
         country = mail_to_country[mail]
     elif phone in phone_to_country:
