@@ -14,14 +14,22 @@ guest_filename = 'guests.csv'
 
 guests = list(csv.reader(open(guest_filename, 'r')))
 
-EMAIL_COLUMN = 3
-PHONE_COLUMN = 4
-COUNTRY_COLUMN = 8
+EMAIL_COLUMN = None
+PHONE_COLUMN = None
+COUNTRY_COLUMN = None
 
-if (guests[0][EMAIL_COLUMN] != 'Email'
-        or guests[0][PHONE_COLUMN] != 'Telephone'
-        or guests[0][COUNTRY_COLUMN] != 'Country'):
-    raise Exception("Guest report changed format!")
+for idx, field in enumerate(guests[0]):
+    if field == 'Email':
+        EMAIL_COLUMN = idx
+    elif field == 'Telephone':
+        PHONE_COLUMN = idx
+    elif field == 'Country':
+        COUNTRY_COLUMN = idx
+
+if EMAIL_COLUMN is None \
+   or PHONE_COLUMN is None \
+   or COUNTRY_COLUMN is None:
+    raise Exception("Guest report is missing a required column!")
 
 mail_to_country = {}
 phone_to_country = {}
@@ -128,7 +136,7 @@ if len(unknown):
         mail = person[0] if not 'Bitte die Buchung entsperren' in person[0] else ''
         phone = person[1] if not 'Bitte die Buchung entsperren' in person[1] else ''
         name = person[2]
-        country = input('Whats the country for %s (Mail: %r, Phone: %r)?' % (name, mail, phone))
+        country = input('Whats the country for %s (Mail: %r, Phone: %r)? ' % (name, mail, phone))
         with open('additions.csv','a') as f:
             line = '%s,%s,%s,%s\n' % (mail,phone,country,name)
             f.write(line)
