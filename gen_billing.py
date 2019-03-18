@@ -16,11 +16,18 @@ invoices_filename = 'invoices.csv'
 
 invoices = list(csv.reader(open(invoices_filename,'r')))
 
-BOOKING_REFERENCE_COLUMN = 5
-REFERENCE_COLUMN = 6
-if (invoices[0][BOOKING_REFERENCE_COLUMN] != 'BookingReference'
-        or invoices[0][REFERENCE_COLUMN] != 'Reference'):
-    raise Exception("Invoice report changed format!")
+BOOKING_REFERENCE_COLUMN = None
+REFERENCE_COLUMN = None
+
+for idx, field in enumerate(invoices[0]):
+    if field == 'BookingReference':
+        BOOKING_REFERENCE_COLUMN = idx
+    elif field == 'Reference':
+        REFERENCE_COLUMN = idx
+
+if BOOKING_REFERENCE_COLUMN is None \
+    or REFERENCE_COLUMN is None:
+        raise Exception("Invoice report is missing a required column!")
 
 booking_to_invoice = {}
 for invoice in invoices[1:]:
@@ -38,7 +45,15 @@ for invoice in invoices[1:]:
 cash_payments = []
 wire_transfers = []
 
-payments = [payment[17:] for payment in csv.reader(open(payments_filename,'r'))]
+in_second_csv = False
+payments = []
+for payment in csv.reader(open(payments_filename, 'r')):
+    if in_second_csv:
+        payments.append(payment)
+    if not payment:
+        in_second_csv = True
+
+payments = [payment[17:] for payment in payments]
 RECEIVED_DATE_COLUMN = 0
 FORENAME_COLUMN = 1
 BOOKING_REFERENCE_COLUMN = 6
@@ -57,7 +72,7 @@ for idx,payment in enumerate(payments[1:]):
         continue
 
     if payment[RECEIVED_DATE_COLUMN] != '(see above)':
-        date = datetime.datetime.strptime(payment[RECEIVED_DATE_COLUMN].split(' ')[0], '%d/%m/%Y')
+        date = payment[RECEIVED_DATE_COLUMN].split(' ')[0]
 
     name = payment[FORENAME_COLUMN].strip()
     reservation = payment[BOOKING_REFERENCE_COLUMN]
@@ -108,7 +123,6 @@ for idx,payment in enumerate(payments[1:]):
 if __name__ == '__main__':
     import xlwt
 
-    date_style = xlwt.easyxf(num_format_str='DD.MM.YYYY')
     cur_style = xlwt.easyxf(num_format_str='€ #.00')
 
     wb = xlwt.Workbook()
@@ -125,7 +139,7 @@ if __name__ == '__main__':
         ws.col(8).width = 500
         ws.col(9).width = 500
         for idx,payment in enumerate(source):
-            ws.write(idx,0,payment['date'],style=date_style)
+            ws.write(idx,0,payment['date'])
             # internal ref stays empty
             ws.write(idx,2,payment['ref'])
             ws.write(idx,3,payment['name'])
