@@ -3,9 +3,10 @@
 import csv
 import sys
 import os
-import datetime
 import time
 from decimal import Decimal
+
+from utils import parse_date
 
 basedir = os.path.dirname(__file__)
 if basedir:
@@ -72,7 +73,7 @@ for idx,payment in enumerate(payments[1:]):
         continue
 
     if payment[RECEIVED_DATE_COLUMN] != '(see above)':
-        date = payment[RECEIVED_DATE_COLUMN].split(' ')[0]
+        date = parse_date(payment[RECEIVED_DATE_COLUMN])
 
     name = payment[FORENAME_COLUMN].strip()
     reservation = payment[BOOKING_REFERENCE_COLUMN]
@@ -123,6 +124,7 @@ for idx,payment in enumerate(payments[1:]):
 if __name__ == '__main__':
     import xlwt
 
+    date_style = xlwt.easyxf(num_format_str='DD.MM.YYYY')
     cur_style = xlwt.easyxf(num_format_str='€ #.00')
 
     wb = xlwt.Workbook()
@@ -139,7 +141,7 @@ if __name__ == '__main__':
         ws.col(8).width = 500
         ws.col(9).width = 500
         for idx,payment in enumerate(source):
-            ws.write(idx,0,payment['date'])
+            ws.write(idx,0,payment['date'],style=date_style)
             # internal ref stays empty
             ws.write(idx,2,payment['ref'])
             ws.write(idx,3,payment['name'])
