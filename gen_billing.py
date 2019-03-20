@@ -100,7 +100,15 @@ for idx,payment in enumerate(payments[1:]):
         print("Error for payment %d %r" % (idx+1,payment))
         print("payment_value_raw: %r" % payment_value_raw)
         raise
-    payment_value_raw = payment_value_raw[2:].replace(',','')
+    payment_value_raw = payment_value_raw[2:]
+
+    # Ensure we always have US style currency format
+    if payment_value_raw[-2] == '.':
+        payment_value_raw = payment_value_raw.replace(',','')
+    else:
+        payment_value_raw = payment_value_raw.replace('.','')
+        payment_value_raw = payment_value_raw.replace(',','.')
+
     payment_value = Decimal(payment_value_raw)
 
     payment_info = {
@@ -120,6 +128,8 @@ for idx,payment in enumerate(payments[1:]):
         'Vorab-bezahlt',
     ]:
         raise RuntimeError("Unhandled Payment method %r" % payment_method)
+wire_transfers = sorted(wire_transfers, key=lambda x: x['date'])
+cash_payments = sorted(cash_payments, key=lambda x: x['date'])
 
 if __name__ == '__main__':
     import xlwt
