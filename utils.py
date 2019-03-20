@@ -27,9 +27,18 @@ def parse_new_booking_format(date_input):
     date_input = replace_by_dict(date_input.lower(), month_to_number)
     return datetime.datetime.strptime(date_input.split(' ')[0], '%d-%m-%Y')
 
+def parse_old_guest_format(date_input):
+    return datetime.datetime.strptime(date_input, '%d-%b-%y')
+
+def parse_new_guest_format(date_input):
+    date_input = replace_by_dict(date_input.lower(), month_to_number)
+    return datetime.datetime.strptime(date_input, '%d %m %Y')
+
 date_parsers = [
     parse_old_booking_format,
-    parse_new_booking_format
+    parse_new_booking_format,
+    parse_old_guest_format,
+    parse_new_guest_format,
 ]
 
 def parse_date(date_input):

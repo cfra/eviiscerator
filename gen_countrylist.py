@@ -5,6 +5,8 @@ import sys
 import os
 import datetime
 
+from utils import parse_date
+
 basedir = os.path.dirname(__file__)
 if basedir:
     os.chdir(basedir)
@@ -103,7 +105,7 @@ for booking in bookings[2:]:
     people = int(booking[BOOKING_ADULTS_COLUMN]) + int(booking[BOOKING_CHILDREN_COLUMN])
     mail = booking[BOOKING_EMAIL_COLUMN]
     phone = booking[BOOKING_TELEPHONE_COLUMN]
-    checkin = datetime.datetime.strptime(booking[BOOKING_CHECKIN_COLUMN], '%d-%b-%y')
+    checkin = parse_date(booking[BOOKING_CHECKIN_COLUMN])
     if first_checkin is None or checkin < first_checkin:
         first_checkin = checkin
     if last_checkin is None or checkin > last_checkin:
