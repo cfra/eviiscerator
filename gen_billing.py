@@ -114,12 +114,12 @@ for idx,payment in enumerate(payments[1:]):
         wire_transfers.append(payment_info)
     elif payment_method == 'Bargeld':
         cash_payments.append(payment_info)
-    else:
-        if payment_method not in [
-                'Kartenlesegerät',
-                'OTA Vorauszahlung',
-            ]:
-            raise RuntimeError("Unhandled Payment method %r" % payment_method)
+    elif payment_method not in [
+        'Kartenlesegerät',
+        'OTA Vorauszahlung',
+        'Vorab-bezahlt',
+    ]:
+        raise RuntimeError("Unhandled Payment method %r" % payment_method)
 
 if __name__ == '__main__':
     import xlwt
